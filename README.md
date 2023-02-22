@@ -1,4 +1,3 @@
-# pygame13
 import math
 import pygame
 import time
@@ -20,13 +19,14 @@ from shield import Shield
 from const import *
 
 FPS = 60
-stone_count = 5
+stone_count = 9999
 alien_count = 3
 missile_count = 1000
 catapult_count = 3
 items_count = 1000
 pluses_count = 1000
 shields = 0
+decrement_stonese = 1
 
 def decrement_stones():
     global stone_count
@@ -77,8 +77,6 @@ if __name__ == "__main__":
     
     clock = pygame.time.Clock()
     
-    t = 0
-    tt = 0
     stone_plus = 0
 
     movexy = 0
@@ -240,23 +238,28 @@ if __name__ == "__main__":
             elif keys[pygame.K_DOWN]:
                 catapult.downward()
 
+        #stone_plus가 1이 되면 돌의 개수가 +1
+        if stone_plus == 1:
+            catapult.stone_plus_in_catapult += 1
+
         #L마우스 버튼이 눌려지면 발사 파워 증가
         if event.type == pygame.MOUSEBUTTONDOWN or mouse_check == 1:
             mouse_check = 1
             if power > MAX_POWER:
                 power = MIN_POWER
             else:
-                power += 0.2   
+                power += 0.2
                 
         #GAME_PLAY 상태일 때 마우스 L버튼이 떨어지면 투석기 공 발사  
         if event.type == pygame.MOUSEBUTTONUP:
             mouse_check = 0
             if stone.state == STONE_READY:
                 t = 0
+                if stone_plus == 1:
+                    if stone1.state == STONE_READY:
+                        ttttt = 0
+                        
                 catapult.fire(power, direction)
-
-        if stone_plus == 1:
-            stone1 += direction + 
 
         #GAME_PLAY 상태일 때 에일리언이 돌을 던짐
         if game_state == GAME_PLAY:
@@ -274,7 +277,7 @@ if __name__ == "__main__":
 
         #GAME_PLAY 상태일 때 plus가 pluse를 던짐
         if game_state == GAME_PLAY:
-            if time_counting % 300 == 0:
+            if time_counting % 320 == 0:
                 if pluse.state == PLUSE_READY:
                     tttt = 0
                     plus.fire(powers, directions)
@@ -300,6 +303,12 @@ if __name__ == "__main__":
             tttt += 0.5
             pluse.move(tttt, (screen.get_width(), screen.get_height()),
                        decrement_pluses)
+
+        if stone_plus == 1:
+            if stone1.state == STONE_FLY:
+                ttttt += 0.5
+                stone1.move(ttttt, (screen.get_width(), screen.get_height()),
+                            decrement_stones) #stone하고 동시에 -1씩 줄어들음.
             
             
         if alien.alive(): #stone과 alien의 충돌 여부를 확인함.
@@ -365,10 +374,9 @@ if __name__ == "__main__":
             collideded = pygame.sprite.groupcollide(catapult_group, pluse_group, False, True)
             if collideded:
                 stone_plus += 1
-            pluse_group.add(pluse)
 
-        #stone_plus가 1이 되면 돌의 개수가 1개 추가
-        #if stone_plus == 1:
+        if stone_plus == 0:
+            stone1_group.add(stone1)
                 
 
         #외계인이 살아 있는데 돌멩이 수가 0이면 게임 오버.
